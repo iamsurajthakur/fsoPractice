@@ -1,0 +1,23 @@
+{
+  "name": "practice4",
+  "version": "1.0.0",
+  "description": "backend fso",
+  "keywords": [
+    "suraj",
+    "fso"
+  ],
+  "license": "ISC",
+  "author": "Suraj Thakur",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "http": "^0.0.1-security"
+  }
+}
