@@ -1,6 +1,7 @@
 const express = require('express')
-const app = express()
 const cors = require('cors')
+
+const app = express()
 
 const requestLogger = (req,res,next) => {
   console.log('Method: ', req.method);
@@ -19,36 +20,23 @@ app.use(requestLogger)
 app.use(cors())
 
 let notes = [
-  {
-    id: "1",
-    content: "HTML is easy",
-    important: true
-  },
-  {
-    id: "2",
-    content: "Browser can execute only JavaScript",
-    important: false
-  },
-  {
-    id: "3",
-    content: "GET and POST are the most important methods of HTTP protocol",
-    important: true
-  }
+  { id: "1", content: "HTML is easy", important: true },
+  { id: "2", content: "Browser can execute only JavaScript", important: false },
+  { id: "3", content: "GET and POST are the most important methods of HTTP protocol", important: true }
 ]
-
 
 const generateId = () => {
   const maxId = notes.length > 0
-  ? Math.max(...notes.map(n => Number(n.id)))
-  : 0
+    ? Math.max(...notes.map(n => Number(n.id)))
+    : 0
   return String(maxId + 1)
 }
 
-app.get('/',(req,res)=>{
+app.get('/', (req,res) => {
   res.send('<h1>Hello world suraj thakur</h1>')
 })
 
-app.get('/api/notes',(req,res)=>{
+app.get('/api/notes', (req,res) => {
   res.json(notes)
 })
 
@@ -61,31 +49,27 @@ app.put('/api/notes/:id', (req, res) => {
     return res.status(404).json({ error: 'Note not found' })
   }
 
-  // Update the note
   const updatedNote = { ...notes[noteIndex], ...body }
   notes[noteIndex] = updatedNote
 
   res.json(updatedNote)
 })
 
-
-app.get('/api/notes/:id',(req,res)=>{
+app.get('/api/notes/:id', (req,res) => {
   const id = req.params.id
   const note = notes.find(note => note.id === id)
   if(note){
     res.json(note)
-  }else{
+  } else {
     res.status(404).end()
   }
 })
 
-app.post('/api/notes', (request, response) => {
-  const body = request.body
+app.post('/api/notes', (req, res) => {
+  const body = req.body
   
   if (!body.content) {
-    return response.status(400).json({ 
-      error: 'content missing' 
-    })
+    return res.status(400).json({ error: 'content missing' })
   }
   
   const note = {
@@ -96,10 +80,10 @@ app.post('/api/notes', (request, response) => {
   
   notes = notes.concat(note)
   
-  response.json(note)
+  res.json(note)
 })
 
-app.delete('/api/notes/:id',(req,res)=>{
+app.delete('/api/notes/:id', (req,res) => {
   const id = req.params.id
   notes = notes.filter(note => note.id !== id)
   
@@ -108,9 +92,4 @@ app.delete('/api/notes/:id',(req,res)=>{
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3000
-
-app.listen(PORT,()=>{
-  console.log(`Server running in port ${PORT}`);
-  
-})
+module.exports = app   // ✅ Export app instead of listen()
