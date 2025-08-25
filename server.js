@@ -18,6 +18,7 @@ const unknownEndpoint = (request, response) => {
 app.use(express.json())
 app.use(requestLogger)
 app.use(cors())
+app.use(express.static('dist'))
 
 let notes = [
   { id: "1", content: "HTML is easy", important: true },
