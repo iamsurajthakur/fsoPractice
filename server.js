@@ -2,8 +2,9 @@ const express = require('express')
 const cors = require('cors')
 
 const app = express()
+const PORT = process.env.PORT || 3000
 
-const requestLogger = (req,res,next) => {
+const requestLogger = (req,_,next) => {
   console.log('Method: ', req.method);
   console.log('Path: ', req.path);
   console.log('Body: ', req.body);
@@ -11,7 +12,7 @@ const requestLogger = (req,res,next) => {
   next()
 }
 
-const unknownEndpoint = (request, response) => {
+const unknownEndpoint = (_, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
@@ -33,11 +34,11 @@ const generateId = () => {
   return String(maxId + 1)
 }
 
-app.get('/', (req,res) => {
+app.get('/', (_,res) => {
   res.send('<h1>Hello world suraj thakur</h1>')
 })
 
-app.get('/api/notes', (req,res) => {
+app.get('/api/notes', (_,res) => {
   res.json(notes)
 })
 
@@ -91,6 +92,10 @@ app.delete('/api/notes/:id', (req,res) => {
   res.status(204).end()
 })
 
+app.listen(PORT,() => {
+  console.log(`Server is running at port ${PORT}`);
+  
+})
 app.use(unknownEndpoint)
 
 module.exports = app   // ✅ Export app instead of listen()
