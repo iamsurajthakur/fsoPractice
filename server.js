@@ -96,6 +96,4 @@ app.listen(PORT,() => {
   console.log(`Server is running at port ${PORT}`);
   
 })
-app.use(unknownEndpoint)
 
-module.exports = app   // ✅ Export app instead of listen()
