@@ -1,8 +1,30 @@
-const express = require('express')
-const cors = require('cors')
+import express from 'express'
+import cors from 'cors'
+import mongoose from 'mongoose'
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const password = process.argv[2]
+const url = `mongodb+srv://suraj:${password}@youtube.3jgyu4s.mongodb.net/noteApp?retryWrites=true&w=majority&appName=youtube`
+
+mongoose.set('strictQuery', false)
+
+try {
+  const connectionInstance = await mongoose.connect(url)
+  console.log(`\n mongoDb connected !! DB HOST: ${connectionInstance.connection.host}`);
+    
+} catch (e) {
+  console.log('Something went wrong, ',e);
+  process.exit(1)
+  
+}
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
 
 const requestLogger = (req,_,next) => {
   console.log('Method: ', req.method);
@@ -39,7 +61,9 @@ app.get('/', (_,res) => {
 })
 
 app.get('/api/notes', (_,res) => {
-  res.json(notes)
+  Note.find({}).then(notes => {
+    res.json(notes)
+  })
 })
 
 app.put('/api/notes/:id', (req, res) => {

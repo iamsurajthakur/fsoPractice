@@ -8,10 +8,10 @@
   ],
   "license": "ISC",
   "author": "Suraj Thakur",
-  "type": "commonjs",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch server.js",
+    "dev": "node --watch server.js system",
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
