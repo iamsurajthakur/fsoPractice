@@ -1,30 +1,9 @@
 import express from 'express'
 import cors from 'cors'
-import mongoose from 'mongoose'
+import Note from './models/note.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const password = process.argv[2]
-const url = `mongodb+srv://suraj:${password}@youtube.3jgyu4s.mongodb.net/noteApp?retryWrites=true&w=majority&appName=youtube`
-
-mongoose.set('strictQuery', false)
-
-try {
-  const connectionInstance = await mongoose.connect(url)
-  console.log(`\n mongoDb connected !! DB HOST: ${connectionInstance.connection.host}`);
-    
-} catch (e) {
-  console.log('Something went wrong, ',e);
-  process.exit(1)
-  
-}
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
-
-const Note = mongoose.model('Note', noteSchema)
 
 const requestLogger = (req,_,next) => {
   console.log('Method: ', req.method);
@@ -61,34 +40,27 @@ app.get('/', (_,res) => {
 })
 
 app.get('/api/notes', (_,res) => {
-  Note.find({}).then(notes => {
-    res.json(notes)
+  Note.find({}).then(note => {
+    res.json(note)
   })
 })
 
 app.put('/api/notes/:id', (req, res) => {
-  const id = req.params.id
   const body = req.body
-  const noteIndex = notes.findIndex(note => note.id === id)
 
-  if (noteIndex === -1) {
-    return res.status(404).json({ error: 'Note not found' })
-  }
-
-  const updatedNote = { ...notes[noteIndex], ...body }
-  notes[noteIndex] = updatedNote
-
-  res.json(updatedNote)
+  Note.findByIdAndUpdate(
+    req.params.id,
+    {content: body.content, important: body.important },
+    {new: true}
+  ).then(updatedNote => {
+    res.json(updatedNote)
+  })
 })
 
 app.get('/api/notes/:id', (req,res) => {
-  const id = req.params.id
-  const note = notes.find(note => note.id === id)
-  if(note){
+  Note.findById(req.params.id).then(note => {
     res.json(note)
-  } else {
-    res.status(404).end()
-  }
+  })
 })
 
 app.post('/api/notes', (req, res) => {
@@ -98,22 +70,20 @@ app.post('/api/notes', (req, res) => {
     return res.status(400).json({ error: 'content missing' })
   }
   
-  const note = {
+  const note = new Note({
     content: body.content,
-    important: body.important || false,
-    id: generateId(),
-  }
+    important: body.important || false
+  })
   
-  notes = notes.concat(note)
-  
-  res.json(note)
+  note.save().then(savedNote => {
+    res.json(savedNote)
+  })
 })
 
 app.delete('/api/notes/:id', (req,res) => {
-  const id = req.params.id
-  notes = notes.filter(note => note.id !== id)
-  
-  res.status(204).end()
+  Note.findByIdAndDelete(req.params.id).then(() => {
+    res.status(204).end()
+  })
 })
 
 app.listen(PORT,() => {
