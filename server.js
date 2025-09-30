@@ -13,20 +13,10 @@ const requestLogger = (req,_,next) => {
   next()
 }
 
-const unknownEndpoint = (_, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-app.use(express.json())
-app.use(requestLogger)
 app.use(cors())
 app.use(express.static('dist'))
-
-let notes = [
-  { id: "1", content: "HTML is easy", important: true },
-  { id: "2", content: "Browser can execute only JavaScript", important: false },
-  { id: "3", content: "GET and POST are the most important methods of HTTP protocol", important: true }
-]
+app.use(express.json())
+app.use(requestLogger)
 
 const generateId = () => {
   const maxId = notes.length > 0
@@ -39,15 +29,10 @@ app.get('/', (_,res) => {
   res.send('<h1>Hello world suraj thakur</h1>')
 })
 
-app.get('/api/notes', (_,res) => {
-  Note.find({}).then(note => {
-    res.json(note)
-  })
-})
 
 app.put('/api/notes/:id', (req, res) => {
   const body = req.body
-
+  
   Note.findByIdAndUpdate(
     req.params.id,
     {content: body.content, important: body.important },
@@ -57,10 +42,16 @@ app.put('/api/notes/:id', (req, res) => {
   })
 })
 
-app.get('/api/notes/:id', (req,res) => {
-  Note.findById(req.params.id).then(note => {
-    res.json(note)
+app.get('/api/notes/:id', (req,res,next ) => {
+  Note.findById(req.params.id)
+  .then(note => {
+    if (note) {
+      res.json(note)
+    } else {
+      res.status(404).end()
+    }
   })
+  .catch(e => next(e))
 })
 
 app.post('/api/notes', (req, res) => {
@@ -79,6 +70,33 @@ app.post('/api/notes', (req, res) => {
     res.json(savedNote)
   })
 })
+
+//   middleware defination
+
+const unknownEndpoint = (_, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
+
+app.get('/api/notes', (_,res) => {
+  Note.find({}).then(note => {
+    res.json(note)
+  })
+})
+
 
 app.delete('/api/notes/:id', (req,res) => {
   Note.findByIdAndDelete(req.params.id).then(() => {
