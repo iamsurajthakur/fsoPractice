@@ -29,7 +29,6 @@ app.get('/', (_,res) => {
   res.send('<h1>Hello world suraj thakur</h1>')
 })
 
-
 app.put('/api/notes/:id', (req, res) => {
   const body = req.body
   
@@ -66,20 +65,32 @@ app.post('/api/notes', (req, res) => {
     important: body.important || false
   })
   
-  note.save().then(savedNote => {
+  note.save()
+  .then(savedNote => {
     res.json(savedNote)
+  })
+  .catch(e => next(e))
+})
+
+app.get('/api/notes', (_,res) => {
+  Note.find({}).then(note => {
+    res.json(note)
+  })
+})
+
+app.delete('/api/notes/:id', (req,res) => {
+  Note.findByIdAndDelete(req.params.id).then(() => {
+    res.status(204).end()
   })
 })
 
 //   middleware defination
-
 const unknownEndpoint = (_, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
-
 app.use(unknownEndpoint)
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, _, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
@@ -88,21 +99,8 @@ const errorHandler = (error, request, response, next) => {
 
   next(error)
 }
-
 app.use(errorHandler)
 
-app.get('/api/notes', (_,res) => {
-  Note.find({}).then(note => {
-    res.json(note)
-  })
-})
-
-
-app.delete('/api/notes/:id', (req,res) => {
-  Note.findByIdAndDelete(req.params.id).then(() => {
-    res.status(204).end()
-  })
-})
 
 app.listen(PORT,() => {
   console.log(`Server is running at port ${PORT}`);
